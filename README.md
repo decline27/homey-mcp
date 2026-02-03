@@ -36,14 +36,36 @@ Add the following to your `claude_desktop_config.json`:
 }
 ```
 
-### Available Tools
+### Available Tools (19 Total)
 
-- `homey_list_devices`: Get all devices and their current states (ID, Name, Zone, Class, Capabilities).
+#### 🏠 Devices & Control
+- `homey_list_devices`: List all devices with their current states (ID, Name, Zone, Class, Capabilities).
 - `homey_get_device`: Get full details for a single device by its ID.
-- `homey_set_capability`: Set a capability value (e.g., `onoff: true`, `dim: 0.5`, `target_temperature: 21`).
-- `homey_list_flows`: List all flows available on the Homey.
-- `homey_run_flow`: Trigger a flow by its ID.
-- `homey_list_zones`: List all zones (rooms/floors) configured in Homey.
+- `homey_get_sensor_readings`: Get current readings from all sensors (temperature, humidity, motion, etc.) across the home.
+- `homey_find_devices_by_zone`: List all devices in a specific room or floor.
+- `homey_control_lights_in_zone`: Bulk control for all lights in a specific zone (Turn on/off).
+- `homey_set_capability`: Set a specific capability value (e.g., `onoff`, `dim`, `target_temperature`).
+
+#### 🚀 Flows & Automation
+- `homey_list_flows`: List all standard flows.
+- `homey_list_advanced_flows`: List all Advanced Flows.
+- `homey_run_flow`: Trigger a standard flow by its ID.
+- `homey_run_advanced_flow`: Trigger an Advanced Flow by its ID.
+- `homey_get_flow`: Get full configuration details for a specific flow.
+- `homey_get_flow_folders`: List the folder structure used to organize flows.
+
+#### 📍 Zones
+- `homey_list_zones`: List all zones (rooms/floors) and their hierarchy.
+
+#### 🧠 Logic & Flow Cards
+- `homey_get_flow_cards`: List available flow cards (triggers, conditions, actions) on the system.
+- `homey_run_flow_card_action`: Execute a specific flow card action directly without needing a flow.
+- `homey_get_device_flow_capabilities`: Identify which flow cards are applicable to a specific device.
+
+#### 📊 Data & Insights
+- `homey_get_energy_data`: Discover and list available energy/power logs.
+- `homey_get_device_insights`: Fetch historical data logs for any device capability over a period (`today`, `last7days`, etc.).
+- `homey_get_live_insights`: Access real-time dashboard data for device capabilities.
 
 ## Troubleshooting
 
