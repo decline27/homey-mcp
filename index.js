@@ -213,6 +213,83 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "homey_get_flow",
+        description: "Get detailed information about a specific flow.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: { type: "string", description: "The ID of the flow" },
+          },
+          required: ["id"],
+        },
+      },
+      {
+        name: "homey_get_flow_folders",
+        description: "List the folder structure for flows.",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
+      {
+        name: "homey_get_flow_cards",
+        description: "List available flow cards (triggers, conditions, actions) for devices or system.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            type: { type: "string", enum: ["trigger", "condition", "action"], description: "Filter by card type" },
+          },
+        },
+      },
+      {
+        name: "homey_run_flow_card_action",
+        description: "Manually execute a specific flow card action.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            uri: { type: "string", description: "The URI of the flow card action (e.g. homey:device:id)" },
+            id: { type: "string", description: "The ID of the action" },
+            args: { type: "object", description: "Arguments for the action" },
+          },
+          required: ["uri", "id"],
+        },
+      },
+      {
+        name: "homey_get_device_insights",
+        description: "Retrieve historical logs for any device capability over a period.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            logId: { type: "string", description: "The ID of the insight log" },
+            resolution: { type: "string", enum: ["today", "last7days", "last31days", "lastYear"], default: "today" },
+          },
+          required: ["logId"],
+        },
+      },
+      {
+        name: "homey_get_device_flow_capabilities",
+        description: "Identify which flow cards are applicable to a specific device.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            deviceId: { type: "string", description: "The ID of the device" },
+          },
+          required: ["deviceId"],
+        },
+      },
+      {
+        name: "homey_get_live_insights",
+        description: "Provides real-time data for specific device capabilities (Dashboard style).",
+        inputSchema: {
+          type: "object",
+          properties: {
+            deviceId: { type: "string", description: "The ID of the device" },
+            capabilityId: { type: "string", description: "The ID of the capability" },
+          },
+          required: ["deviceId"],
+        },
+      },
     ],
   };
 });
@@ -375,7 +452,73 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         let output = energyLogs.map(l => `- ${l.name} (${l.id})`).join('\n');
         return {
-          content: [{ type: "text", text: `Available Energy Logs:\n${output || "No energy logs found."}\n\nNote: Visualizing historical data requires specific log IDs.` }],
+          content: [{ type: "text", text: `Available Energy Logs:\n${output || "No energy logs found."}\n\nNote: Visualizing historical data requires logId.` }],
+        };
+      }
+
+      case "homey_get_flow": {
+        const flow = await homey.flow.getFlow({ id: args.id });
+        return {
+          content: [{ type: "text", text: JSON.stringify(flow, null, 2) }],
+        };
+      }
+
+      case "homey_get_flow_folders": {
+        const folders = await homey.flow.getFolders();
+        const output = Object.values(folders).map(f => `- ${f.name} [ID: ${f.id}]`).join('\n');
+        return {
+          content: [{ type: "text", text: `Flow Folders:\n${output}` }],
+        };
+      }
+
+      case "homey_get_flow_cards": {
+        const cards = await homey.flow.getFlowCards();
+        let filtered = Object.values(cards);
+        if (args.type) filtered = filtered.filter(c => c.type === args.type);
+
+        const output = filtered.slice(0, 50).map(c => `- [${c.type}] ${c.uri}:${c.id}\n  Title: ${c.title}`).join('\n\n');
+        return {
+          content: [{ type: "text", text: `Flow Cards (showing top 50):\n${output}` }],
+        };
+      }
+
+      case "homey_run_flow_card_action": {
+        await homey.flow.runFlowCardAction({
+          uri: args.uri,
+          id: args.id,
+          args: args.args || {},
+        });
+        return {
+          content: [{ type: "text", text: `✅ Successfully executed flow card action: ${args.id}` }],
+        };
+      }
+
+      case "homey_get_device_insights": {
+        const resolution = args.resolution || 'today';
+        const entries = await homey.insights.getLogEntries({ id: args.logId, resolution });
+        return {
+          content: [{ type: "text", text: `Insights for ${args.logId} (${resolution}):\n${JSON.stringify(entries, null, 2)}` }],
+        };
+      }
+
+      case "homey_get_device_flow_capabilities": {
+        const cards = await homey.flow.getFlowCards();
+        const deviceCards = Object.values(cards).filter(c =>
+          c.uri.includes(args.deviceId) || (c.args && c.args.some(arg => arg.type === 'device'))
+        );
+        const output = deviceCards.map(c => `- [${c.type}] ${c.id}: ${c.title}`).join('\n');
+        return {
+          content: [{ type: "text", text: `Flow Capabilities for device ${args.deviceId}:\n${output || "No specific cards found."}` }],
+        };
+      }
+
+      case "homey_get_live_insights": {
+        const resolution = args.resolution || 'today';
+        // Mocking/returning current state for live insights if full stream is not available
+        const device = await homey.devices.getDevice({ id: args.deviceId });
+        const value = args.capabilityId ? device.capabilitiesObj[args.capabilityId] : device.capabilitiesObj;
+        return {
+          content: [{ type: "text", text: `Live data for ${device.name}${args.capabilityId ? ` [${args.capabilityId}]` : ''}: ${JSON.stringify(value)}` }],
         };
       }
 
