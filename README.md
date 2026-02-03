@@ -27,7 +27,7 @@ Add the following to your `claude_desktop_config.json`:
   "mcpServers": {
     "homey": {
       "command": "node",
-      "args": ["/Users/kjetilvetlejord/.gemini/antigravity/scratch/homey-mcp/index.js"],
+      "args": ["/Users/xxx/.gemini/antigravity/scratch/homey-mcp/index.js"],
       "env": {
         "HOMEY_TOKEN": "YOUR_TOKEN_HERE"
       }
