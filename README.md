@@ -27,7 +27,7 @@ Add the following to your `claude_desktop_config.json`:
   "mcpServers": {
     "homey": {
       "command": "node",
-      "args": ["/Users/xxx/.gemini/antigravity/scratch/homey-mcp/index.js"],
+      "args": ["/Users/XX/.gemini/antigravity/scratch/homey-mcp/index.js"],
       "env": {
         "HOMEY_TOKEN": "YOUR_TOKEN_HERE"
       }
@@ -35,6 +35,26 @@ Add the following to your `claude_desktop_config.json`:
   }
 }
 ```
+
+### Connecting with ChatGPT Desktop
+
+ChatGPT (macOS/Windows) supports MCP servers via **Developer Mode**.
+
+1. Open ChatGPT Desktop.
+2. Go to **Settings** → **Apps** → **Advanced settings**.
+3. Enable **Developer Mode**.
+4. Click **Create app** (or "Add App") and configure a connection:
+   - **Name**: Homey
+   - **URL**: `http://localhost:3000` (if running locally as an HTTP/SSE server) or use the Claude-style local command if supported in your version.
+   
+   > [!NOTE]
+   > ChatGPT currently primarily supports MCP over **SSE (HTTP)**. To use this as a local command-line tool like in Claude, you may need a bridge or for ChatGPT to fully roll out stdio support.
+
+### Connecting with ChatGPT (Web/Custom GPTs)
+
+To use Homey MCP in the ChatGPT web interface:
+1. You must host this MCP server on a public URL (e.g., via `ngrok` or a VPS).
+2. Use the **Actions** feature in a Custom GPT to connect to your MCP server's OpenAPI spec or SSE endpoint.
 
 ### Available Tools (19 Total)
 
